@@ -1,5 +1,6 @@
 package demo.order.saga;
 
+import static demo.customer.api.channels.Channels.CUSTOMER_CHANNEL;
 import static demo.order.api.common.RejectionReason.INSUFFICIENT_CREDIT;
 import static demo.order.api.common.RejectionReason.UNKNOWN_CUSTOMER;
 import static io.eventuate.tram.commands.consumer.CommandWithDestinationBuilder.send;
@@ -55,7 +56,7 @@ public class CreateOrderSaga implements SimpleSaga<CreateOrderSagaData> {
 
   private CommandWithDestination reserveCredit(CreateOrderSagaData data) {
     return send(new ReserveCreditCommand(data.getCustomerId(), data.getOrderId(), data.getOrderTotal()))
-        .to("customerService")
+        .to(CUSTOMER_CHANNEL)
         .build();
   }
 

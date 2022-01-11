@@ -1,5 +1,6 @@
 package demo.customer.saga;
 
+import static demo.customer.api.channels.Channels.CUSTOMER_CHANNEL;
 import static io.eventuate.tram.commands.consumer.CommandHandlerReplyBuilder.withFailure;
 import static io.eventuate.tram.commands.consumer.CommandHandlerReplyBuilder.withSuccess;
 import static io.eventuate.tram.sagas.participant.SagaCommandHandlersBuilder.fromChannel;
@@ -25,15 +26,15 @@ public class CustomerCommandHandler {
   private final CustomerService customerService;
 
   public CommandHandlers commandHandlerDefinitions() {
-    return fromChannel("customerService")
+    return fromChannel(CUSTOMER_CHANNEL)
         .onMessage(ReserveCreditCommand.class, this::reserveCredit)
         .build();
   }
 
-  public Message reserveCredit(CommandMessage<ReserveCreditCommand> cm) {
-    ReserveCreditCommand cmd = cm.getCommand();
+  public Message reserveCredit(CommandMessage<ReserveCreditCommand> message) {
+    ReserveCreditCommand command = message.getCommand();
     try {
-      customerService.reserveCredit(cmd.getCustomerId(), cmd.getOrderId(), cmd.getOrderTotal());
+      customerService.reserveCredit(command.getCustomerId(), command.getOrderId(), command.getOrderTotal());
       return withSuccess(new CustomerCreditReserved());
     } catch (CustomerNotFoundException e) {
       return withFailure(new CustomerNotFound());

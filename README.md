@@ -9,3 +9,4 @@ docker-compose up --force-recreate
 
 * http://localhost:8081/swagger-ui/
 * http://localhost:8082/swagger-ui/
+* http://localhost:9000/

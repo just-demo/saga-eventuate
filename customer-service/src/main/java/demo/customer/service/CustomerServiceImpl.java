@@ -1,10 +1,7 @@
 package demo.customer.service;
 
 
-import static java.math.BigDecimal.ZERO;
-
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -41,19 +38,12 @@ public class CustomerServiceImpl implements CustomerService {
       throws CustomerCreditLimitExceededException {
     // TODO: does it persist the customer???
     Customer customer = customerRepository.findById(customerId).orElseThrow(CustomerNotFoundException::new);
-    if (getCreditAvailable(customer).compareTo(orderTotal) < 0) {
+    BigDecimal creditAvailable = customer.getCreditReservations().values().stream()
+        .reduce(customer.getCreditLimit(), BigDecimal::subtract);
+    if (creditAvailable.compareTo(orderTotal) < 0) {
       throw new CustomerCreditLimitExceededException();
     }
     customer.getCreditReservations().put(orderId, orderTotal);
-  }
-
-  private static BigDecimal getCreditAvailable(Customer customer) {
-    BigDecimal creditUsed = sum(customer.getCreditReservations().values());
-    return customer.getCreditLimit().subtract(creditUsed);
-  }
-
-  private static BigDecimal sum(Collection<BigDecimal> values) {
-    return values.stream().reduce(ZERO, BigDecimal::add);
   }
 
   private static Customer toEntity(CustomerCreateModel customer) {
